@@ -1,33 +1,40 @@
+import java.awt.*;
+import java.util.Stack;
+
 /**
  * An abstract concept in the game, but represents a space that can be held by an insect
  */
 public class Tile {
 
-    public static int idCount = 0;
-    private final int id = idCount++;
+    //https://www.redblobgames.com/grids/hexagons/#map-storage
+    // q,r,(s) coordinates from here. Using the axial coordinate system
+    private final int q;
+    private final int r;
 
+    private Stack<Insect> insect; // the insect(s) on the tile
 
-    private Insect insect; // the insect on the tile
-    private Tile[] surrounding;
-
-    public Tile(){
-        surrounding = new Tile[6]; // (0 represents up, continues clockwise)
-        System.out.println("Tile created, id: " + id);
-        Board.tiles.put(id(),this);
+    public Tile(int q, int r){
+        this.q = q;
+        this.r = r;
+        insect = new Stack<>();
+        System.out.println("Tile created, (q,r): (" + getQ() + ", " + getR() + ")");
+        Board.tiles.put(new Point(getQ(), getR()),this);
     }
 
-    /**
-     * Called from within tile t, which is from direction dir
-     * @param t the tile that created this one
-     * @param dir the direction this tile is in respect to t
-     */
-    public Tile(Tile t, int dir){
-        this();
-        surrounding[(dir + 3)%6] = t;
+    public int getQ(){
+        return q;
     }
 
-    public int id(){
-        return id;
+    public int getR(){
+        return r;
+    }
+
+    public int getS(){
+        return -getQ()-getR();
+    }
+
+    public Point id(){
+        return new Point(getQ(), getR());
     }
 
     /**
@@ -35,16 +42,18 @@ public class Tile {
      * @return true if no insect, false otherwise
      */
     public boolean isEmpty(){
-        return insect == null;
+        return insect.empty();
     }
 
     /**
-     * Returns if the tile in the specified direction is empty;
-     * @param direction the direction in question
+     *  Returns if the tile in the specified direction is empty;
+     * @param dq the q direction
+     * @param dr the r direction
      * @return true if an insect is not residing there
      */
-    public boolean isEmpty(int direction){
-        return getTile(direction) == null || getTile(direction).isEmpty();
+    public boolean isEmpty(int dq, int dr){
+        Tile t = getTileFrom(dq, dr);
+        return t == null || t.isEmpty();
     }
 
     /**
@@ -54,66 +63,15 @@ public class Tile {
     public Insect getInsect(){
         if (isEmpty())
             throw new NullPointerException("No insect is on this tile");
-        return insect;
+        return insect.peek();
     }
 
     /**
      * Adds the given insect to this tile
      * @param insect the insect to add
-     * @return true if the insect was added, false if not
      */
-    public boolean addInsect(Insect insect){
-        if (!isEmpty())
-            return false;
-        this.insect = insect;
-        copySurroundingTiles();
-        addEmptyTiles();
-        return true;
-    }
-
-    /**
-     * Takes tiles from surrounding tiles that should be connected to this tile
-     */
-    private void copySurroundingTiles(){
-        for (int i = 0; i < 6; i++){
-            Tile tile = surrounding[i];
-            if (tile != null) {
-                addTile(tile.getTile(i + 2), i + 1);
-                addTile(tile.getTile(i - 2), i - 1);
-            }
-        }
-    }
-
-    /**
-     * Adds an empty tile to remaining empty surrounding tiles
-     */
-    private void addEmptyTiles(){
-        for (int i = 0; i < 6; i++){
-            if (surrounding[i] == null)
-                addTile(i);
-        }
-    }
-
-    /**
-     * Adds the specified tile to the direction
-     * @param tile the tile to add
-     * @param direction the direction to add it to
-     * @return true if it was added, false if that direction was not empty
-     */
-    public boolean addTile(Tile tile, int direction){
-        if (!isEmpty(direction))
-            return false;
-        surrounding[direction % 6] = tile;
-        return true;
-    }
-
-    /**
-     * Creates an empty tile to the direction
-     * @param direction the direction to add it to
-     * @return true if it was added, false if that direction was not empty
-     */
-    public boolean addTile(int direction){
-        return addTile(new Tile(this, direction), direction);
+    public void addInsect(Insect insect){
+        this.insect.push(insect);
     }
 
     /**
@@ -121,30 +79,61 @@ public class Tile {
      * @return true if the removal was successful, false if there was no insect here
      */
     public boolean removeInsect(){
-        if (isEmpty())
-            return false;
-        insect = null;
-        return true;
+        if (!isEmpty()){
+            insect.pop();
+            return true;
+        }
+        else return false;
     }
 
     /**
      * Returns the tile from the given direction
-     * @param direction the direction of the tile to return
+     * @param dq the q direction
+     * @param dr the r direction
      * @return the tile
      */
-    public Tile getTile(int direction){
-        return surrounding[direction%6];
+    public Tile getTileFrom(int dq, int dr){
+        return Board.getTile(getQ()+dq, getR()+dr);
     }
 
     /**
      * Returns true if a piece can slide to the specified direction)
-     * (Essentially, returns false if the space is too tight
-     * @param direction the direction the insect is moving from
+     * (Essentially, returns false if the space is too tight)
+     * @param dq the q direction
+     * @param dr the r direction
      * @return true if it can, false otherwise
      */
-    public boolean canSlideTo(int direction){
-        return isEmpty(direction-1) || isEmpty(direction+1);
+    public boolean canSlideTo(int dq, int dr){
+        return isEmpty(dr,-dq-dr) || isEmpty(-dq-dr, dq);
     }
 
+    /**
+     * Returns true if the direction supplied is adjacent to this tile
+     * @param dq the q direction
+     * @param dr the r direction
+     * @return true if it is adjacent, false otherwise
+     */
+    public boolean validDirection(int dq, int dr){
+        return Math.abs(dq + dr) <= 1;
+    }
+
+    /**
+     * Checks whether the tile supplied is adjacent to this one
+     * @param t the tile to compare to
+     * @return true if they are adjacent, false otherwise
+     */
+    public boolean isAdjacent(Tile t){
+        return isAdjacent(t.getQ(), t.getR());
+    }
+
+    /**
+     * checks if the coordinates q,r are adjacent to this tile
+     * @param q the q coordinate
+     * @param r the r coordinate
+     * @return true if they are adjacent, false otherwise
+     */
+    public boolean isAdjacent(int q, int r){
+        return validDirection(getQ()-q, getR()-r);
+    }
 
 }
