@@ -1,6 +1,8 @@
+import java.awt.*;
+
 public class Spider extends Insect {
-    public Spider(Colour colour) {
-        super(colour);
+    public Spider(Colour colour, Point pos) {
+        super(colour, pos);
     }
 
     @Override

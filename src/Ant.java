@@ -1,6 +1,8 @@
+import java.awt.*;
+
 public class Ant extends Insect{
-    public Ant(Colour colour) {
-        super(colour);
+    public Ant(Colour colour, Point pos) {
+        super(colour, pos);
     }
 
     @Override

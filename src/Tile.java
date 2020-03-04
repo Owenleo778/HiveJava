@@ -62,7 +62,7 @@ public class Tile {
      */
     public Insect getInsect(){
         if (isEmpty())
-            throw new NullPointerException("No insect is on this tile");
+           return null;
         return insect.peek();
     }
 
@@ -84,6 +84,13 @@ public class Tile {
             return true;
         }
         else return false;
+    }
+
+    /**
+     * @return the number of insects on this tile
+     */
+    public int insects(){
+        return insect.size();
     }
 
     /**
@@ -134,6 +141,15 @@ public class Tile {
      */
     public boolean isAdjacent(int q, int r){
         return validDirection(getQ()-q, getR()-r);
+    }
+
+    /**
+     * @return the list of possible directions according to the (q,r) coordinate system
+     */
+    public static Point[] directions(){
+        Point[] list = {new Point(-1, 0), new Point(1, 0), new Point(-1, 1),
+                new Point(1, -1), new Point(0, 1), new Point(0, -1)};
+        return list;
     }
 
 }

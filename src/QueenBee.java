@@ -1,10 +1,12 @@
+import java.awt.*;
+
 /**
  * Implements the Queen Bee piece
  */
 public class QueenBee extends Insect {
 
-    public QueenBee(Colour colour){
-        super(colour);
+    public QueenBee(Colour colour, Point pos){
+        super(colour, pos);
     }
 
     @Override
@@ -13,4 +15,12 @@ public class QueenBee extends Insect {
             return false;
         return true;
     }
+
+    public boolean canMove(){
+        if (!isOnTop())
+            return false;
+
+        return true;
+    }
+
 }

@@ -1,6 +1,8 @@
+import java.awt.*;
+
 public class Beetle extends Insect{
-    public Beetle(Colour colour) {
-        super(colour);
+    public Beetle(Colour colour, Point pos) {
+        super(colour, pos);
     }
 
     @Override
