@@ -9,7 +9,7 @@ public class Main {
         }
 
         for (int i = 0; i < insects.length; i++){
-            System.out.println(insects[i].holdsHiveTogether());
+            System.out.println(tiles[0].distance(tiles[i]));
         }
     }
 }

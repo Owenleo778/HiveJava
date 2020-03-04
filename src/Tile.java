@@ -152,4 +152,22 @@ public class Tile {
         return list;
     }
 
+    /**
+     * The distance between the given point and the point of this tile
+     * @param p the point ot compare to
+     * @return the distance between the points
+     */
+    public int distance(Point p){
+        return Math.max(Math.abs(getQ()-p.x), Math.max(Math.abs(getR() - p.y), Math.abs(getS() - (-p.x - p.y))));
+    }
+
+    /**
+     * The distance between the given tile and this tile
+     * @param t the tile to compare to
+     * @return the distance between the tiles
+     */
+    public int distance(Tile t){
+        return distance(t.id());
+    }
+
 }

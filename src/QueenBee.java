@@ -16,11 +16,13 @@ public class QueenBee extends Insect {
         return true;
     }
 
-    public boolean canMove(){
-        if (!isOnTop())
+    public boolean canMove(Point p){
+        if (Board.getTile(position()).distance(p) > 1)
             return false;
-
         return true;
     }
 
+    public boolean canMove(Tile tile){
+        return canMove(tile.id());
+    }
 }

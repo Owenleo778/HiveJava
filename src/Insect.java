@@ -60,8 +60,8 @@ public abstract class Insect {
 
         connected(insects, visited, 0);
 
-        for (int i = 0; i < visited.length; i++)
-            if (!visited[i])
+        for (boolean visit : visited)
+            if (!visit)
                 return true;
 
         return false;
@@ -81,6 +81,14 @@ public abstract class Insect {
             if (insects.contains(p) && !visited[insects.indexOf(p)])
                 connected(insects, visited, insects.indexOf(p));
         }
+    }
+
+    /**
+     * Whether this piece is eligible to move
+     * @return true if it can, false otherwise
+     */
+    public boolean canMove(){
+        return isOnTop() && !holdsHiveTogether();
     }
 
     public enum Colour{
